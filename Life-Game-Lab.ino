@@ -5,8 +5,6 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <EEPROM.h>
-#include <Adafruit_TinyUSB.h>
-#include <FatFS.h>
 
 #define SSD1306_DEVICE_ID 0x3c
 #define select_start_pin 15
