@@ -777,6 +777,7 @@ void grow_up::clearSave()
 {
     EEPROM.write(SAVE_ADDR, 0);
     EEPROM.write(RECORD_ADDR, 0);
+    EEPROM.commit();
 }
 
 // ---- ボタン ----
