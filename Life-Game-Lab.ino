@@ -47,8 +47,10 @@ void setup()
     if (!digitalRead(select_start_pin)){
         EEPROM.write(0, 0);
         EEPROM.write(1, 0);
-        grow_up::clearSave();
         EEPROM.commit();
+    }
+    if (!digitalRead(left_pin)){
+        grow_up::clearSave();
     }
     delay(2000);
     while(!digitalRead(select_start_pin) || !digitalRead(left_pin) || !digitalRead(right_pin)){delay(10);}
