@@ -1,4 +1,4 @@
-#include "Tamagotchi.h"
+#include "grow_up.h"
 #include <EEPROM.h>
 
 // ---- スプライトデータ (drawBitmap形式: 1行=横8bit単位, MSBが左) ----
@@ -425,7 +425,7 @@ static int16_t clampWeight(int16_t v)
 
 // ---- 本体 ----
 
-void Tamagotchi::play(byte buzzer, byte select, byte left, byte right, Adafruit_SSD1306* display)
+void grow_up::play(byte buzzer, byte select, byte left, byte right, Adafruit_SSD1306* display)
 {
     m_buzzerPin = buzzer;
     m_selectPin = select;
@@ -486,7 +486,7 @@ void Tamagotchi::play(byte buzzer, byte select, byte left, byte right, Adafruit_
     }
 }
 
-void Tamagotchi::resetPet()
+void grow_up::resetPet()
 {
     m_stage = EGG;
     m_adultForm = FORM_NORMAL;
@@ -513,7 +513,7 @@ void Tamagotchi::resetPet()
     m_petDir = 1;
 }
 
-bool Tamagotchi::isSleeping()
+bool grow_up::isSleeping()
 {
     if (m_stage == EGG || m_stage == DEAD)
         return false;
@@ -522,7 +522,7 @@ bool Tamagotchi::isSleeping()
 
 // ---- 1秒ごとのゲーム進行 ----
 
-void Tamagotchi::tick()
+void grow_up::tick()
 {
     m_ageSec++;
 
@@ -663,7 +663,7 @@ void Tamagotchi::tick()
         saveState();
 }
 
-void Tamagotchi::die()
+void grow_up::die()
 {
     m_stage = DEAD;
     m_mode = NORMAL;
@@ -681,7 +681,7 @@ void Tamagotchi::die()
 //         [15]poop [16]mistakes [17-18]age(分) [19]weight [20]discipline [21]checksum
 // 記録:   [24]magic [25]generation [26-27]bestAge(分) [28]checksum
 
-void Tamagotchi::saveState()
+void grow_up::saveState()
 {
     uint32_t ageMin = m_ageSec / 60;
     if (ageMin > 65535) ageMin = 65535;
@@ -711,7 +711,7 @@ void Tamagotchi::saveState()
     m_lastSaveSec = m_ageSec;
 }
 
-bool Tamagotchi::loadState()
+bool grow_up::loadState()
 {
     if (EEPROM.read(SAVE_ADDR) != SAVE_MAGIC)
         return false;
@@ -746,7 +746,7 @@ bool Tamagotchi::loadState()
     return true;
 }
 
-void Tamagotchi::loadRecords()
+void grow_up::loadRecords()
 {
     m_generation = 1;
     m_bestAgeMin = 0;
@@ -761,7 +761,7 @@ void Tamagotchi::loadRecords()
     m_bestAgeMin = ((uint16_t)hi << 8) | lo;
 }
 
-void Tamagotchi::saveRecords()
+void grow_up::saveRecords()
 {
     uint8_t hi = (uint8_t)(m_bestAgeMin >> 8);
     uint8_t lo = (uint8_t)(m_bestAgeMin & 0xff);
@@ -773,7 +773,7 @@ void Tamagotchi::saveRecords()
     EEPROM.commit();
 }
 
-void Tamagotchi::clearSave()
+void grow_up::clearSave()
 {
     EEPROM.write(SAVE_ADDR, 0);
     EEPROM.write(RECORD_ADDR, 0);
@@ -781,7 +781,7 @@ void Tamagotchi::clearSave()
 
 // ---- ボタン ----
 
-byte Tamagotchi::pinOf(uint8_t index)
+byte grow_up::pinOf(uint8_t index)
 {
     switch (index) {
     case 0:  return m_selectPin;
@@ -790,7 +790,7 @@ byte Tamagotchi::pinOf(uint8_t index)
     }
 }
 
-bool Tamagotchi::buttonPressed(uint8_t index)
+bool grow_up::buttonPressed(uint8_t index)
 {
     bool level = digitalRead(pinOf(index)); // HIGH=離している
     if (level != m_lastLevel[index] && millis() - m_lastEdgeMs[index] > 30) {
@@ -802,7 +802,7 @@ bool Tamagotchi::buttonPressed(uint8_t index)
     return false;
 }
 
-void Tamagotchi::waitAllRelease()
+void grow_up::waitAllRelease()
 {
     while (!digitalRead(m_selectPin) || !digitalRead(m_leftPin) || !digitalRead(m_rightPin)) {
         delay(10);
@@ -811,7 +811,7 @@ void Tamagotchi::waitAllRelease()
         m_lastLevel[i] = true;
 }
 
-int8_t Tamagotchi::waitLeftRight(uint32_t timeoutMs)
+int8_t grow_up::waitLeftRight(uint32_t timeoutMs)
 {
     uint32_t start = millis();
     while (millis() - start < timeoutMs) {
@@ -824,7 +824,7 @@ int8_t Tamagotchi::waitLeftRight(uint32_t timeoutMs)
 
 // ---- 入力処理 ----
 
-void Tamagotchi::handleInput()
+void grow_up::handleInput()
 {
     bool sel = buttonPressed(0);
     bool left = buttonPressed(1);
@@ -898,7 +898,7 @@ void Tamagotchi::handleInput()
     }
 }
 
-void Tamagotchi::executeIcon()
+void grow_up::executeIcon()
 {
     bool sleeping = isSleeping();
     switch (m_icon) {
@@ -939,7 +939,7 @@ void Tamagotchi::executeIcon()
 
 // ---- アクション ----
 
-void Tamagotchi::doFeed(bool snack)
+void grow_up::doFeed(bool snack)
 {
     if (!snack && m_hunger >= 100) {
         refuseAnim(); // おなかいっぱい
@@ -971,7 +971,7 @@ void Tamagotchi::doFeed(bool snack)
     melodyHappy();
 }
 
-void Tamagotchi::doPlayGuess()
+void grow_up::doPlayGuess()
 {
     // 左右当てゲーム: ペットがどちらを向くか当てる。5回中3回で勝ち
     beep(2000, 20);
@@ -1034,7 +1034,7 @@ void Tamagotchi::doPlayGuess()
     waitAllRelease();
 }
 
-void Tamagotchi::doPlayTiming()
+void grow_up::doPlayTiming()
 {
     // タイミングゲーム: 動くマーカーをゾーン内で止める。3回中2回で勝ち
     beep(2000, 20);
@@ -1105,7 +1105,7 @@ void Tamagotchi::doPlayTiming()
     waitAllRelease();
 }
 
-void Tamagotchi::doClean()
+void grow_up::doClean()
 {
     beep(2000, 20);
     for (int16_t off = 0; off <= 40; off += 8) {
@@ -1118,7 +1118,7 @@ void Tamagotchi::doClean()
     melodyHappy();
 }
 
-void Tamagotchi::doMedicine()
+void grow_up::doMedicine()
 {
     beep(2000, 20);
     for (uint8_t i = 0; i < 2; i++) {
@@ -1135,7 +1135,7 @@ void Tamagotchi::doMedicine()
     }
 }
 
-void Tamagotchi::doScold()
+void grow_up::doScold()
 {
     if (m_sulking) {
         // すねているときにしかると、しつけが身につく
@@ -1155,7 +1155,7 @@ void Tamagotchi::doScold()
     }
 }
 
-void Tamagotchi::doEvent(uint8_t kind)
+void grow_up::doEvent(uint8_t kind)
 {
     switch (kind) {
     case 0: // 流れ星
@@ -1202,7 +1202,7 @@ void Tamagotchi::doEvent(uint8_t kind)
     }
 }
 
-void Tamagotchi::refuseAnim()
+void grow_up::refuseAnim()
 {
     for (uint8_t i = 0; i < 3; i++) {
         drawScene(-3);
@@ -1217,7 +1217,7 @@ void Tamagotchi::refuseAnim()
     m_display->display();
 }
 
-void Tamagotchi::movePet()
+void grow_up::movePet()
 {
     if (m_stage != BABY && m_stage != CHILD && m_stage != ADULT)
         return;
@@ -1238,7 +1238,7 @@ void Tamagotchi::movePet()
 
 // ---- 描画 ----
 
-void Tamagotchi::drawSprite2x(int16_t x, int16_t y, const uint8_t* bmp, uint8_t w, uint8_t h)
+void grow_up::drawSprite2x(int16_t x, int16_t y, const uint8_t* bmp, uint8_t w, uint8_t h)
 {
     uint8_t bytesPerRow = (w + 7) / 8;
     for (uint8_t row = 0; row < h; row++) {
@@ -1249,7 +1249,7 @@ void Tamagotchi::drawSprite2x(int16_t x, int16_t y, const uint8_t* bmp, uint8_t 
     }
 }
 
-const uint8_t* Tamagotchi::petBitmap()
+const uint8_t* grow_up::petBitmap()
 {
     bool frameB = m_animFrame && !m_sick && !m_sulking && !isSleeping();
     switch (m_stage) {
@@ -1269,7 +1269,7 @@ const uint8_t* Tamagotchi::petBitmap()
     }
 }
 
-const char* Tamagotchi::stageName()
+const char* grow_up::stageName()
 {
     switch (m_stage) {
     case EGG:   return "EGG";
@@ -1280,7 +1280,7 @@ const char* Tamagotchi::stageName()
     }
 }
 
-void Tamagotchi::drawIconBar()
+void grow_up::drawIconBar()
 {
     for (uint8_t i = 0; i < ICON_COUNT; i++) {
         int16_t x = 3 + i * 13;
@@ -1290,13 +1290,13 @@ void Tamagotchi::drawIconBar()
     }
 }
 
-void Tamagotchi::drawPoops(int16_t offset)
+void grow_up::drawPoops(int16_t offset)
 {
     for (uint8_t p = 0; p < m_poop; p++)
         drawSprite2x(POOP_X[p] + offset, POOP_Y[p], SPR_POOP, 8, 8);
 }
 
-void Tamagotchi::drawScene(int8_t shake, int16_t poopOffset)
+void grow_up::drawScene(int8_t shake, int16_t poopOffset)
 {
     m_display->clearDisplay();
     drawIconBar();
@@ -1351,13 +1351,13 @@ void Tamagotchi::drawScene(int8_t shake, int16_t poopOffset)
     }
 }
 
-void Tamagotchi::renderNormal()
+void grow_up::renderNormal()
 {
     drawScene();
     m_display->display();
 }
 
-void Tamagotchi::renderDead()
+void grow_up::renderDead()
 {
     m_display->clearDisplay();
     drawSprite2x(16, 24, SPR_TOMB, 16, 16);
@@ -1378,7 +1378,7 @@ void Tamagotchi::renderDead()
     m_display->display();
 }
 
-void Tamagotchi::renderStatus()
+void grow_up::renderStatus()
 {
     m_display->clearDisplay();
     m_display->setTextSize(1);
@@ -1422,7 +1422,7 @@ void Tamagotchi::renderStatus()
     m_display->display();
 }
 
-void Tamagotchi::renderMenu(const char* const* items, uint8_t count, uint8_t cursor)
+void grow_up::renderMenu(const char* const* items, uint8_t count, uint8_t cursor)
 {
     m_display->clearDisplay();
     m_display->setTextSize(2);
@@ -1438,7 +1438,7 @@ void Tamagotchi::renderMenu(const char* const* items, uint8_t count, uint8_t cur
     m_display->display();
 }
 
-void Tamagotchi::drawBar(int16_t x, int16_t y, int16_t value)
+void grow_up::drawBar(int16_t x, int16_t y, int16_t value)
 {
     m_display->drawRect(x, y, 90, 10, SSD1306_WHITE);
     m_display->fillRect(x + 2, y + 2, (int16_t)(86L * value / 100), 6, SSD1306_WHITE);
@@ -1446,14 +1446,14 @@ void Tamagotchi::drawBar(int16_t x, int16_t y, int16_t value)
 
 // ---- サウンド ----
 
-void Tamagotchi::beep(uint16_t freq, uint16_t ms)
+void grow_up::beep(uint16_t freq, uint16_t ms)
 {
     tone(m_buzzerPin, freq);
     delay(ms);
     noTone(m_buzzerPin);
 }
 
-void Tamagotchi::melodyHappy()
+void grow_up::melodyHappy()
 {
     beep(1300, 60);
     delay(30);
@@ -1462,33 +1462,33 @@ void Tamagotchi::melodyHappy()
     beep(2100, 90);
 }
 
-void Tamagotchi::melodyRefuse()
+void grow_up::melodyRefuse()
 {
     beep(200, 120);
 }
 
-void Tamagotchi::melodyAttention()
+void grow_up::melodyAttention()
 {
     beep(2600, 40);
     delay(40);
     beep(2600, 40);
 }
 
-void Tamagotchi::melodyAngry()
+void grow_up::melodyAngry()
 {
     beep(180, 100);
     delay(40);
     beep(180, 100);
 }
 
-void Tamagotchi::melodyMorning()
+void grow_up::melodyMorning()
 {
     beep(1500, 50);
     delay(30);
     beep(2000, 80);
 }
 
-void Tamagotchi::melodyEvolve()
+void grow_up::melodyEvolve()
 {
     beep(800, 80);
     delay(30);
@@ -1499,7 +1499,7 @@ void Tamagotchi::melodyEvolve()
     beep(1700, 120);
 }
 
-void Tamagotchi::melodyDeath()
+void grow_up::melodyDeath()
 {
     beep(1000, 150);
     delay(50);

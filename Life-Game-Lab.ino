@@ -2,7 +2,7 @@
 #include "Display.h"
 #include "Dinosaur.h"
 #include "life.h"
-#include "Tamagotchi.h"
+#include "grow_up.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <EEPROM.h>
@@ -16,7 +16,7 @@
 Display display;
 Dinosaur dinosaur;
 Life_game life;
-Tamagotchi tamagotchi;
+grow_up gup;
 Adafruit_SSD1306 ssdisplay(128, 64, &Wire);
 
 void setup()
@@ -47,7 +47,7 @@ void setup()
     if (!digitalRead(select_start_pin)){
         EEPROM.write(0, 0);
         EEPROM.write(1, 0);
-        Tamagotchi::clearSave();
+        grow_up::clearSave();
         EEPROM.commit();
     }
     delay(2000);
@@ -58,7 +58,7 @@ void setup()
     // 0 = ライフ
     // 1 = dino
     // 2 = キッチンタイマー
-    // 3 = たまごっち
+    // 3 = grow_up
     int gameNo = 0;
     uint8_t maxDino = EEPROM.read(0);
     uint8_t maxDino2 = EEPROM.read(1);
@@ -100,7 +100,7 @@ void setup()
             ssdisplay.print("Timer");
         } else if(gameNo == 3){
             ssdisplay.print("Pet");
-            if (EEPROM.read(Tamagotchi::SAVE_ADDR) == Tamagotchi::SAVE_MAGIC){
+            if (EEPROM.read(grow_up::SAVE_ADDR) == grow_up::SAVE_MAGIC){
                 ssdisplay.setCursor(0, 30);
                 ssdisplay.setTextSize(2);
                 ssdisplay.print("CONTINUE");
@@ -153,7 +153,7 @@ void lifeGame(){
 }
 
 void petGame(){
-    tamagotchi.play(buzzer_pin, select_start_pin, left_pin, right_pin, &ssdisplay);
+    gup.play(buzzer_pin, select_start_pin, left_pin, right_pin, &ssdisplay);
 }
 
 void sound_manager(int sound_no){

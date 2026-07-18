@@ -3,9 +3,9 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-// たまごっち風育成ゲーム
+// grow_up育成ゲーム
 // 操作: left = アイコン送り / right = アイコン戻し / select_start = 決定
-class Tamagotchi {
+class grow_up {
 public:
     // EEPROMの0-1番地はDinoのハイスコアが使用しているため8番地以降を使う
     static const int SAVE_ADDR = 8;
