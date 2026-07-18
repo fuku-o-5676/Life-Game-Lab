@@ -2,6 +2,7 @@
 #include "Display.h"
 #include "Dinosaur.h"
 #include "life.h"
+#include "grow_up.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <EEPROM.h>
@@ -15,6 +16,7 @@
 Display display;
 Dinosaur dinosaur;
 Life_game life;
+grow_up gup;
 Adafruit_SSD1306 ssdisplay(128, 64, &Wire);
 
 void setup()
@@ -47,6 +49,9 @@ void setup()
         EEPROM.write(1, 0);
         EEPROM.commit();
     }
+    if (!digitalRead(left_pin)){
+        grow_up::clearSave();
+    }
     delay(2000);
     while(!digitalRead(select_start_pin) || !digitalRead(left_pin) || !digitalRead(right_pin)){delay(10);}
     ssdisplay.clearDisplay();
@@ -55,6 +60,7 @@ void setup()
     // 0 = ライフ
     // 1 = dino
     // 2 = キッチンタイマー
+    // 3 = grow_up
     int gameNo = 0;
     uint8_t maxDino = EEPROM.read(0);
     uint8_t maxDino2 = EEPROM.read(1);
@@ -63,9 +69,9 @@ void setup()
     while(digitalRead(select_start_pin)){
         if (!digitalRead(left_pin)){
             buzzer();
-            if (gameNo < 2){
+            if (gameNo < 3){
                 gameNo++;
-            } else if(gameNo == 2){
+            } else if(gameNo == 3){
                 gameNo = 0;
             }
             while(!digitalRead(left_pin) || !digitalRead(right_pin)){};
@@ -74,7 +80,7 @@ void setup()
             if (gameNo > 0){
                 gameNo--;
             } else if(gameNo == 0){
-                gameNo = 2;
+                gameNo = 3;
             }
             while(!digitalRead(left_pin) || !digitalRead(right_pin)){};
         }
@@ -94,6 +100,13 @@ void setup()
             ssdisplay.print(String(maxScore));
         } else if(gameNo == 2){
             ssdisplay.print("Timer");
+        } else if(gameNo == 3){
+            ssdisplay.print("Pet");
+            if (EEPROM.read(grow_up::SAVE_ADDR) == grow_up::SAVE_MAGIC){
+                ssdisplay.setCursor(0, 30);
+                ssdisplay.setTextSize(2);
+                ssdisplay.print("CONTINUE");
+            }
         }
         ssdisplay.display();
     }
@@ -111,6 +124,8 @@ void setup()
         dino_play();
     } else if(gameNo == 2){
         timer();
+    } else if(gameNo == 3){
+        petGame();
     }
 }
 
@@ -137,6 +152,10 @@ void dino_play(){
 
 void lifeGame(){
     life.setLife(buzzer_pin, select_start_pin, left_pin, right_pin, &ssdisplay);
+}
+
+void petGame(){
+    gup.play(buzzer_pin, select_start_pin, left_pin, right_pin, &ssdisplay);
 }
 
 void sound_manager(int sound_no){
