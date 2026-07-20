@@ -1,4 +1,5 @@
 #include "life.h"
+#include "picoPwmAudio.h"
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -42,8 +43,9 @@ void Life_game::addRandomCells(int num) {
   }
 }
 
-void Life_game::setLife(byte buzzer_pin, byte meteo_pin, byte reset_pin, byte reset2_pin, Adafruit_SSD1306* display)
+void Life_game::setLife(byte buzzer_pin, byte meteo_pin, byte reset_pin, byte reset2_pin, Adafruit_SSD1306* display, PicoPwmAudio* audio)
 {
+  audio->init(buzzer_pin);
   // Wire.end();
   // //I2C0の場合
   // Wire.setSDA(0);
@@ -117,24 +119,30 @@ void Life_game::setLife(byte buzzer_pin, byte meteo_pin, byte reset_pin, byte re
       display->setTextSize(3);
       display->print("METEOR!");
       display->display();
-      for (int i=0;i<3;i++){
-        for (int j=0;j<=3;j++){
-          tone(buzzer_pin, 2000);
-          delay(40);
-          noTone(buzzer_pin);
-          delay(80);
-        }
-        noTone(buzzer_pin);
-        delay(100);
-      }
-      delay(500);
-      for (int k=2000;k>=40;k = k - 20){
-        tone(buzzer_pin, k);
-        delay(20);
-      }
-      delay(50);
-      noTone(buzzer_pin);
+      audio->writeTone(440);
       delay(100);
+      audio->writeTone(523);
+      delay(100);
+      audio->writeTone(622);
+      delay(500);
+      audio->writeTone(330);
+      delay(100);
+      audio->writeTone(392);
+      delay(100);
+      audio->writeTone(466);
+      delay(500);
+      audio->writeTone(220);
+      delay(100);
+      audio->writeTone(261);
+      delay(100);
+      audio->writeTone(311);
+      delay(500);
+      audio->writeTone(110);
+      delay(100);
+      audio->writeTone(130);
+      delay(100);
+      audio->writeTone(155);
+      delay(500);
       addRandomCells(random(50, 121));
     }
     if (!digitalRead(reset_pin) && !digitalRead(reset2_pin)){
@@ -143,11 +151,30 @@ void Life_game::setLife(byte buzzer_pin, byte meteo_pin, byte reset_pin, byte re
       display->setTextSize(3);
       display->print("RESET!");
       display->display();
-      for (int k=2000;k>=40;k = k - 20){
-        tone(buzzer_pin, k);
-        delay(20);
-      }
-      noTone(buzzer_pin);
+      audio->writeTone(523);
+      delay(100);
+      audio->writeTone(659);
+      delay(100);
+      audio->writeTone(784);
+      delay(500);
+      audio->writeTone(392);
+      delay(100);
+      audio->writeTone(446);
+      delay(100);
+      audio->writeTone(554);
+      delay(500);
+      audio->writeTone(261);
+      delay(100);
+      audio->writeTone(311);
+      delay(100);
+      audio->writeTone(370);
+      delay(500);
+      audio->writeTone(130);
+      delay(100);
+      audio->writeTone(155);
+      delay(100);
+      audio->writeTone(185);
+      delay(500);
       initRandomGrid();
       generation = 0;
     }

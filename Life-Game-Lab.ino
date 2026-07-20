@@ -118,13 +118,10 @@ void setup()
         }
         ssdisplay.display();
     }
-    tone(buzzer_pin, 1000);
+    audio.writeTone(1000);
     delay(40);
-    noTone(buzzer_pin);
-    delay(20);
-    tone(buzzer_pin, 1500);
+    audio.writeTone(1500);
     delay(40);
-    noTone(buzzer_pin);
     while(!digitalRead(select_start_pin)) {}
     if (gameNo == 0){
         lifeGame();
@@ -139,6 +136,7 @@ void setup()
 
 void loop()
 {
+    
 }
 
 void dino_play(){
@@ -159,7 +157,7 @@ void dino_play(){
 }
 
 void lifeGame(){
-    life.setLife(buzzer_pin, select_start_pin, left_pin, right_pin, &ssdisplay);
+    life.setLife(buzzer_pin, select_start_pin, left_pin, right_pin, &ssdisplay, &audio);
 }
 
 void petGame(){
@@ -378,10 +376,7 @@ void timer(){
 }
 
 void buzzer(){
-    tone(buzzer_pin, 2000);
-    delay(20);
-    noTone(buzzer_pin);
-    delay(20);
+    audio.writeTone(1000);
 }
 
 void timeUp(){
@@ -394,20 +389,17 @@ void timeUp(){
         if (millis() - countUp > 500){
             countUp = millis();
             buzzerState2 = !buzzerState2;
-            noTone(buzzer_pin);
             ring++;
         }
         if (millis() - countUp2 > 40 && buzzerState2){
             countUp2 = millis();
             if (buzzerState){
-                tone(buzzer_pin, 5000);
+                audio.writeTone(5000);
             } else {
-                noTone(buzzer_pin);
             }
             buzzerState = !buzzerState;
         }
     }
-    noTone(buzzer_pin);
     buzzer();
 }
 

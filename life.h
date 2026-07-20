@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include "picoPwmAudio.h"
 
 class Life_game{
   private:
@@ -21,5 +22,5 @@ class Life_game{
   int countNeighbors(int x, int y);
   void addRandomCells(int num);
   public:
-  void setLife(byte buzzer_pin, byte meteo_pin, byte reset_pin, byte reset2_pin, Adafruit_SSD1306* display);
+  void setLife(byte buzzer_pin, byte meteo_pin, byte reset_pin, byte reset2_pin, Adafruit_SSD1306* display, PicoPwmAudio* audio);
 };
