@@ -3,6 +3,8 @@
 #include "Dinosaur.h"
 #include "life.h"
 #include "grow_up.h"
+#include "charKatakana.h"
+#include "picoPwmAudio.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <EEPROM.h>
@@ -18,6 +20,7 @@ Dinosaur dinosaur;
 Life_game life;
 grow_up gup;
 Adafruit_SSD1306 ssdisplay(128, 64, &Wire);
+PicoPwmAudio audio;
 
 void setup()
 {
@@ -42,8 +45,13 @@ void setup()
     ssdisplay.setCursor(60, 45);
     ssdisplay.print("Lab.");
     ssdisplay.display();
-    buzzer();
-    buzzer();
+    audio.init(buzzer_pin);
+    audio.startTone();
+    audio.writeTone(262); // C4
+    delay(100);
+    audio.writeTone(330); // E4
+    delay(100);
+    audio.writeTone(392); // G4
     if (!digitalRead(select_start_pin)){
         EEPROM.write(0, 0);
         EEPROM.write(1, 0);
