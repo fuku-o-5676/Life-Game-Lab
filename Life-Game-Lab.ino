@@ -5,6 +5,7 @@
 #include "grow_up.h"
 #include "charKatakana.h"
 #include "picoPwmAudio.h"
+#include "village.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <EEPROM.h>
@@ -21,6 +22,8 @@ Life_game life;
 grow_up gup;
 Adafruit_SSD1306 ssdisplay(128, 64, &Wire);
 PicoPwmAudio audio;
+Village village;
+charKatakana kana;
 
 void setup()
 {
@@ -69,6 +72,7 @@ void setup()
     // 1 = dino
     // 2 = キッチンタイマー
     // 3 = grow_up
+    // 4 = 感染症シミュレータ
     int gameNo = 0;
     uint8_t maxDino = EEPROM.read(0);
     uint8_t maxDino2 = EEPROM.read(1);
@@ -77,9 +81,9 @@ void setup()
     while(digitalRead(select_start_pin)){
         if (!digitalRead(left_pin)){
             buzzer();
-            if (gameNo < 3){
+            if (gameNo < 4){
                 gameNo++;
-            } else if(gameNo == 3){
+            } else if(gameNo == 4){
                 gameNo = 0;
             }
             while(!digitalRead(left_pin) || !digitalRead(right_pin)){};
@@ -88,7 +92,7 @@ void setup()
             if (gameNo > 0){
                 gameNo--;
             } else if(gameNo == 0){
-                gameNo = 3;
+                gameNo = 4;
             }
             while(!digitalRead(left_pin) || !digitalRead(right_pin)){};
         }
@@ -115,6 +119,8 @@ void setup()
                 ssdisplay.setTextSize(2);
                 ssdisplay.print("CONTINUE");
             }
+        } else if(gameNo == 4){
+            ssdisplay.print("Kansen");
         }
         ssdisplay.display();
     }
@@ -131,6 +137,8 @@ void setup()
         timer();
     } else if(gameNo == 3){
         petGame();
+    } else if(gameNo == 4){
+        doKansen();
     }
 }
 
@@ -162,6 +170,10 @@ void lifeGame(){
 
 void petGame(){
     gup.play(buzzer_pin, select_start_pin, left_pin, right_pin, &ssdisplay);
+}
+
+void doKansen(){
+    village.play(buzzer_pin, select_start_pin, left_pin, right_pin, &ssdisplay);
 }
 
 void sound_manager(int sound_no){
@@ -406,4 +418,6 @@ void timeUp(){
 void setup1(){
 }
 void loop1(){
+    updateAudioCore1();
+    delay(1);
 }

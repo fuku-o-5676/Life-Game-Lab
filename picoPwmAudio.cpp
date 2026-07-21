@@ -26,14 +26,18 @@ void PicoPwmAudio::init(uint8_t pinNo) {
     pwm_set_chan_level(_slice_num, _channel, PWM_TOP_VAL / 2);
 }
 
-void PicoPwmAudio::writeTone(uint16_t audio_frequency) {
+void PicoPwmAudio::writeTone(uint16_t audio_frequency, uint32_t sustain_ms) {
     if (audio_frequency == 0) return;
 
-    // 既存の同じ周波数が鳴っていればリセットして再発音
+    // ミリ秒からサンプル数への変換
+    uint32_t sustain_smp = (uint32_t)((float)AUDIO_SAMPLE_RATE * (sustain_ms / 1000.0f));
+
+    // 既存の同じ周波数が鳴っていればリセットしてパラメータ更新
     for (int i = 0; i < MAX_POLYPHONY; i++) {
         if (_voices[i].active && (uint16_t)_voices[i].frequency == audio_frequency) {
             _voices[i].phase = 0.0f;
             _voices[i].volume = 1.0f;
+            _voices[i].sustain_samples = sustain_smp;
             return;
         }
     }
@@ -65,9 +69,10 @@ void PicoPwmAudio::writeTone(uint16_t audio_frequency) {
     v.phase = 0.0f;
     v.phase_increment = v.frequency / (float)AUDIO_SAMPLE_RATE;
     v.volume = 1.0f;
+    v.sustain_samples = sustain_smp;
     
-    // 0.5秒で 1.0 から 0.0 になる減衰レートを計算
-    v.decay_rate = 1.0f / (AUDIO_SAMPLE_RATE * 0.5f);
+    // 1.0 秒で 1.0 から 0.0 になる減衰レート（1サンプルあたり）
+    v.decay_rate = 1.0f / ((float)AUDIO_SAMPLE_RATE * 0.3f);
     
     v.active = true;
 }
@@ -81,6 +86,7 @@ void PicoPwmAudio::clearTone() {
         _voices[i].phase_increment = 0.0f;
         _voices[i].volume = 0.0f;
         _voices[i].decay_rate = 0.0f;
+        _voices[i].sustain_samples = 0;
     }
 }
 
@@ -127,11 +133,17 @@ uint16_t PicoPwmAudio::tick() {
             v.phase -= 1.0f;
         }
 
-        // 4. 音量の減衰（0.5秒で0になる処理）
-        v.volume -= v.decay_rate;
-        if (v.volume <= 0.0f) {
-            v.volume = 0.0f;
-            v.active = false; // 消音完了したらボイスを解放
+        // 4. 持続時間と減衰（エンベロープ）の制御
+        if (v.sustain_samples > 0) {
+            // 持続時間が残っている間は音量を1.0に維持
+            v.sustain_samples--;
+        } else {
+            // 持続時間経過後、1秒かけて減衰
+            v.volume -= v.decay_rate;
+            if (v.volume <= 0.0f) {
+                v.volume = 0.0f;
+                v.active = false; // 消音完了したらボイスを解放
+            }
         }
     }
 

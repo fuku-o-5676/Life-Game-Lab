@@ -14,12 +14,13 @@
 
 // 各発音（ボイス）の管理構造体
 struct Voice {
-    bool active;           // 再生中フラグ
-    float frequency;       // 周波数 (Hz)
-    float phase;           // 現在の位相 (0.0 ~ 1.0)
-    float phase_increment; // 1サンプルごとの位相進み量
-    float volume;          // 現在の音量 (1.0 ~ 0.0)
-    float decay_rate;      // 1サンプルあたりの音量減衰量
+    bool active;               // 再生中フラグ
+    float frequency;           // 周波数 (Hz)
+    float phase;               // 現在の位相 (0.0 ~ 1.0)
+    float phase_increment;     // 1サンプルごとの位相進み量
+    float volume;              // 現在の音量 (1.0 ~ 0.0)
+    float decay_rate;          // 1サンプルあたりの音量減衰量
+    uint32_t sustain_samples;  // 保持する残りのサンプル数
 };
 
 class PicoPwmAudio {
@@ -36,9 +37,10 @@ public:
     /**
      * @brief 合成波形（音）の追加
      * @param audio_frequency 追加する音の周波数 (Hz)
-     * @note 再生中・停止中に関わらずいつでも呼び出し可能です。
+     * @param sustain_ms 音量を維持する持続時間 (ミリ秒、デフォルト: 0)
+     * @note sustain_ms 経過後、1秒かけてエンベロープ（フェードアウト）します。
      */
-    void writeTone(uint16_t audio_frequency);
+    void writeTone(uint16_t audio_frequency, uint32_t sustain_ms = 0);
 
     /**
      * @brief 現在登録されているすべてのトーンを消去して無音にします
